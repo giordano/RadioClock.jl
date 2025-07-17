@@ -1,0 +1,4 @@
+name = "RadioClock"
+uuid = "494dee28-fb50-4d66-82c2-2f703a44d82e"
+version = "0.1.0"
+authors = ["Mosè Giordano <mose@gnu.org>"]
