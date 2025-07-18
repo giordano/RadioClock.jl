@@ -107,7 +107,7 @@ end
     @test decode(DCF77, DCF77Data("000000000000000010101010000101000001011001111110000000000000")) == berlin(2000, 3, 26, 1, 42)
 
     # Roundtrip of encoding/decoding for a large number of datetimes
-    for dt in berlin(2000, 1, 11, 0, 0):Minute(23):berlin(2038, 3, 28, 1, 0)
+    for dt in berlin(2000, 1, 11, 0, 0):Minute(13):berlin(2038, 3, 28, 1, 0)
         @test decode(DCF77, encode_dcf77(dt)) == dt
     end
 end
