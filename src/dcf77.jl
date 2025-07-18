@@ -18,20 +18,20 @@ function decode(::Type{DCF77}, data::AbstractVector{Bool})
 
     @assert data[21] "20th bit of DCF77 signal must be 1"
 
-    minutes = evalpoly(2, @view data[22:28])
+    minutes = decode_2digit_bcd(@view data[22:28])
     @assert mod(count_ones(minutes), 2) == data[29] "Minutes data is not consistent with parity check"
 
-    hours = evalpoly(2, @view data[30:35])
+    hours = decode_2digit_bcd(@view data[30:35])
     @assert mod(count_ones(hours), 2) == data[36] "Hours data is not consistent with parity check"
 
-    day_month = evalpoly(2, @view data[37:42])
-    day_week = evalpoly(2, @viwe data[43:45])
-    month = evalpoly(2, @view data[46:50])
+    day_month = decode_2digit_bcd(@view data[37:42])
+    day_week = decode_2digit_bcd(@view data[43:45])
+    month = decode_2digit_bcd(@view data[46:50])
     # NOTE: the signal reports only the year within the century, for the time being we
     # resove the ambiguity by making the strong assumption we are in the 21st century, good
     # enough until I'm alive.  TODO for future maintainers: work out the century (at least
     # within a 400-year range) from day of the week.
-    year = evalpoly(2, @view data[51:58]) + 2000
+    year = decode_2digit_bcd(@view data[51:58]) + 2000
 
     @assert mod(count(@view data[37:58]), 2) == data[59] "Date data is not consistent with parity check"
 
