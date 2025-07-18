@@ -12,3 +12,5 @@ end
 
 decode_2digit_bcd(x::AbstractVector{Bool}) =
     decode_2digit_bcd(Int(evalpoly(2, x)))
+
+check_parity(x::AbstractVector{Bool}) = foldl(⊻, x; init=false)
