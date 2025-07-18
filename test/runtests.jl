@@ -50,6 +50,22 @@ function encode_dcf77(year::Integer, month::Integer, day::Integer, hour::Integer
 end
 
 @testset "DCF77" begin
-    dt = astimezone(round(ZonedDateTime(now(UTC), tz"UTC"), Minute), tz"Europe/Berlin")
-    @test decode(DCF77, encode_dcf77(dt)) == dt
+    decode_str(T, str) = decode(T, parse.(Bool, collect(str)))
+    berlin(x...) = ZonedDateTime(x..., tz"Europe/Berlin")
+
+    # Example from https://gabor.heja.hu/blog/2020/12/12/receiving-and-decoding-the-dcf77-time-signal-with-an-atmega-attiny-avr/
+    @test decode_str(DCF77, "000010100101001000101110010011000001010010001100010000010000") == berlin(2020, 11, 12, 1, 13)
+
+    # Various dates, independently verified at https://gheja.github.io/dcf77-decoder/tools/decode_js/decode.html
+    @test decode_str(DCF77, "000000000000000001001110011000100010100100111111000110000000") == berlin(2006, 7, 9, 22, 33)
+    @test decode_str(DCF77, "000000000000000001001000000000100100100011011101000010100010") == berlin(2014, 5, 31, 12, 0)
+    @test decode_str(DCF77, "000000000000000000101010011011110100100101100010000110100000") == berlin(2016, 2, 29, 17, 32)
+    @test decode_str(DCF77, "000000000000000011001000100010100001111001111000011001100010") == ZonedDateTime(2019, 10, 27, 2, 8, tz"Europe/Berlin", 1)
+    @test decode_str(DCF77, "000000000000000000101000100010100001111001111000011001100010") == ZonedDateTime(2019, 10, 27, 2, 8, tz"Europe/Berlin", 2)
+    @test decode_str(DCF77, "000000000000000010101010000101000001011001111110000000000000") == berlin(2000, 3, 26, 1, 42)
+
+    # Roundtrip of encoding/decoding for a large number of datetimes
+    for dt in berlin(2000, 1, 11, 0, 0):Minute(23):berlin(2038, 3, 28, 1, 0)
+        @test decode(DCF77, encode_dcf77(dt)) == dt
+    end
 end
