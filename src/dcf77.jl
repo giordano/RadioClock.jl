@@ -16,7 +16,13 @@ DCF77Data(str::String) = DCF77Data(evalpoly(2, parse.(UInt64, collect(str))))
 Base.getindex(x::DCF77Data, i::Integer) = extract_bits(x.x, i, i)
 
 function Base.show(io::IO, x::DCF77Data)
-    println(io, reverse(bitstring(x.x)[5:64]))
+    date = try
+        decode(DCF77, x.x)
+    catch
+        "Invalid date"
+    end
+    println(io, "Date: ", date)
+    print(io, "Binary representation: ", reverse(bitstring(x.x)[5:64]))
 end
 
 function decode(::Type{DCF77}, data::DCF77Data)
