@@ -16,7 +16,7 @@ function decode(::Type{DCF77}, data::AbstractVector{Bool})
 
     leap_second_announcement = data[20]
 
-    @assert data[21] "20th bit of DCF77 signal must be 1"
+    @assert data[21] "21st bit of DCF77 signal must be 1"
 
     minutes_data = @view data[22:28]
     minutes = decode_2digit_bcd(minutes_data)
