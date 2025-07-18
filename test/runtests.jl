@@ -162,4 +162,65 @@ end
         invalid_timezone_consistency_data |= (UInt64(1) << 18) | (UInt64(1) << 17)
         @test_throws AssertionError decode(DCF77, DCF77Data(invalid_timezone_consistency_data))
     end
+
+    @testset "Pretty printing" begin
+        # Test valid DCF77 data printing
+        str = "000000000000000000101111001001110001111000101010000000010010"
+        valid_data = DCF77Data(str)
+        output = repr(valid_data)
+
+        # Should contain "Date:" and the actual decoded date
+        @test occursin("Date:", output)
+        @test occursin("2020-02-07T07:27:00+01:00", output)  # Expected decoded date
+
+        # Should contain "Binary representation:" and the binary string
+        @test occursin("Binary representation:", output)
+        @test occursin(str, output)
+
+        # Test invalid DCF77 data printing
+        invalid_data = DCF77Data(UInt64(1))  # Invalid: first bit is 1
+        output = repr(invalid_data)
+
+        # Should contain "Date:" and "Invalid date"
+        @test occursin("Date:", output)
+        @test occursin("Invalid date", output)
+
+        # Should still contain "Binary representation:" and the binary string
+        @test occursin("Binary representation:", output)
+        @test occursin("100000000000000000000000000000000000000000000000000000000000", output)
+
+        # Test another valid data with different date
+        str = "000000000000000001001000100011100011111010101100101000010000"
+        valid_data2 = DCF77Data(str)
+        output = repr(valid_data2)
+
+        @test occursin("Date:", output)
+        @test occursin("2021-09-17T23:08:00+02:00", output)  # Expected decoded date
+
+        @test occursin("Binary representation:", output)
+        @test occursin(str, output)
+
+        # Test that the output format is consistent
+        lines = split(output, '\n')
+        @test length(lines) == 2  # Should have exactly 2 lines
+        @test startswith(lines[1], "Date: ")
+        @test startswith(lines[2], "Binary representation: ")
+
+        # Test edge case: data with all zeros
+        zero_data = DCF77Data(UInt64(0))
+        output = repr(zero_data)
+        @test occursin("Date:", output)
+        @test occursin("Binary representation:", output)
+        @test occursin("000000000000000000000000000000000000000000000000000000000000", output)
+
+        # Test that the binary representation is always 60 bits long
+        for data in (valid_data, invalid_data, valid_data2, zero_data)
+            output = repr(data)
+            lines = split(output, '\n')
+            binary_line = lines[2]
+            binary_part = split(binary_line, ": ")[2]
+            @test length(binary_part) == 60  # Should be exactly 60 bits
+        end
+    end
+
 end
