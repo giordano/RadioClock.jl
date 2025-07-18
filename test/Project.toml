@@ -1,0 +1,6 @@
+[deps]
+RadioClock = "494dee28-fb50-4d66-82c2-2f703a44d82e"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[sources]
+RadioClock = {path = ".."}
