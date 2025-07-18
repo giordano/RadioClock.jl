@@ -40,10 +40,10 @@ function decode(::Type{DCF77}, data::AbstractVector{Bool})
     @assert !data[60] "Last bit must be 0"
     # Ignore leap second for the time being.
 
-    zdt = ZonedDateTime(year, month, day_month, hour, minute, tz"Europe/Berlin")
+    zdt = ZonedDateTime(year, month, day_month, hours, minutes, tz"Europe/Berlin")
     # More consistency checks
     @assert dayofweek(zdt) == day_week "Day of the week data is not consistent"
-    @assert FixedTimeZone(zdt) == FixedTimeZone(cet_in_effect ? "UTC+1" : "UTC+2") "CET/CEST data is not consistent with date"
+    @assert FixedTimeZone(zdt) == FixedTimeZone(cet_in_effect ? "CET" : "CEST", 3600, cet_in_effect ? 0 : 3600) "CET/CEST data is not consistent with date"
 
     return zdt
 end
