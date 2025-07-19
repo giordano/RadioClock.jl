@@ -49,9 +49,11 @@ function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Signed
     second_start = firstindex(signal)
     second_done = true
     second = 0
+    idx = 0
 
     # Wait for the beginning of the minute
-    for idx in eachindex(signal)
+    while !done
+        idx += 1
         if waiting
             if idx > fiftynine_window && all(<=(0), @view(signal[max(begin, idx - 1 - fiftynine_window):max(begin, idx-1)])) && signal[idx] > threshold
                 waiting = false
