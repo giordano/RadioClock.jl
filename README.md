@@ -1,6 +1,6 @@
 # RadioClock
 
-[![CI](https://github.com/giordano/RadioClock.jl/workflows/CI/badge.svg)](https://github.com/giordano/RadioClock.jl/actions?query=workflow%3ACI)
+[![CI](https://github.com/giordano/RadioClock.jl/workflows/UnitTests/badge.svg)](https://github.com/giordano/RadioClock.jl/actions?query=workflow%3AUnitTests)
 [![Coverage](https://codecov.io/gh/giordano/RadioClock.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/giordano/RadioClock.jl)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 

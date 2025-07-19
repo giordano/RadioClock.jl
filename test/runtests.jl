@@ -102,12 +102,12 @@ end
         @test decode(DCF77, DCF77Data("000010100101001000101110010011000001010010001100010000010000")) == berlin(2020, 11, 12, 1, 13)
 
         # Various dates, independently verified at https://gheja.github.io/dcf77-decoder/tools/decode_js/decode.html
-        @test decode(DCF77, DCF77Data("000000000000000001001110011000100010100100111111000110000000")) == berlin(2006, 7, 9, 22, 33)
-        @test decode(DCF77, DCF77Data("000000000000000001001000000000100100100011011101000010100010")) == berlin(2014, 5, 31, 12, 0)
-        @test decode(DCF77, DCF77Data("000000000000000000101010011011110100100101100010000110100000")) == berlin(2016, 2, 29, 17, 32)
-        @test decode(DCF77, DCF77Data("000000000000000011001000100010100001111001111000011001100010")) == ZonedDateTime(2019, 10, 27, 2, 8, tz"Europe/Berlin", 1)
-        @test decode(DCF77, DCF77Data("000000000000000000101000100010100001111001111000011001100010")) == ZonedDateTime(2019, 10, 27, 2, 8, tz"Europe/Berlin", 2)
-        @test decode(DCF77, DCF77Data("000000000000000010101010000101000001011001111110000000000000")) == berlin(2000, 3, 26, 1, 42)
+        @test decode(DCF77, "000000000000000001001110011000100010100100111111000110000000") == berlin(2006, 7, 9, 22, 33)
+        @test decode(DCF77, "000000000000000001001000000000100100100011011101000010100010") == berlin(2014, 5, 31, 12, 0)
+        @test decode(DCF77, "000000000000000000101010011011110100100101100010000110100000") == berlin(2016, 2, 29, 17, 32)
+        @test decode(DCF77, "000000000000000011001000100010100001111001111000011001100010") == ZonedDateTime(2019, 10, 27, 2, 8, tz"Europe/Berlin", 1)
+        @test decode(DCF77, "000000000000000000101000100010100001111001111000011001100010") == ZonedDateTime(2019, 10, 27, 2, 8, tz"Europe/Berlin", 2)
+        @test decode(DCF77, "000000000000000010101010000101000001011001111110000000000000") == berlin(2000, 3, 26, 1, 42)
 
         # Roundtrip of encoding/decoding for a large number of datetimes
         for dt in berlin(2000, 1, 11, 0, 0):Minute(13):berlin(2038, 3, 28, 1, 0)
@@ -127,42 +127,42 @@ end
         # Both CET and CEST set to true (inconsistent)
         base_data = DCF77Data("000000000000000001001000100100000011111010001111001010010010")
         invalid_cet_cest_data = base_data.x | (UInt64(1) << 17) | (UInt64(1) << 18)
-        @test_throws AssertionError decode(DCF77, DCF77Data(invalid_cet_cest_data))
+        @test_throws AssertionError decode(DCF77, invalid_cet_cest_data)
 
         # Both CET and CEST set to false (inconsistent)
         invalid_cet_cest2_data = base_data.x & ~(UInt64(1) << 17) & ~(UInt64(1) << 18)
-        @test_throws AssertionError decode(DCF77, DCF77Data(invalid_cet_cest2_data))
+        @test_throws AssertionError decode(DCF77, invalid_cet_cest2_data)
 
         # Test bit 20 must be 1
         invalid_bit20_data = base_data.x & ~(UInt64(1) << 20)
-        @test_throws AssertionError decode(DCF77, DCF77Data(invalid_bit20_data))
+        @test_throws AssertionError decode(DCF77, invalid_bit20_data)
 
         # Test minutes parity check failure
         invalid_minutes_parity_data = base_data.x ⊻ (UInt64(1) << 28)
-        @test_throws AssertionError decode(DCF77, DCF77Data(invalid_minutes_parity_data))
+        @test_throws AssertionError decode(DCF77, invalid_minutes_parity_data)
 
         # Test hours parity check failure
         invalid_hours_parity_data = base_data.x ⊻ (UInt64(1) << 35)
-        @test_throws AssertionError decode(DCF77, DCF77Data(invalid_hours_parity_data))
+        @test_throws AssertionError decode(DCF77, invalid_hours_parity_data)
 
         # Test date parity check failure
         invalid_date_parity_data = base_data.x ⊻ (UInt64(1) << 58)
-        @test_throws AssertionError decode(DCF77, DCF77Data(invalid_date_parity_data))
+        @test_throws AssertionError decode(DCF77, invalid_date_parity_data)
 
         # Test last bit must be 0
         invalid_last_bit_data = base_data.x | (UInt64(1) << 59)
-        @test_throws AssertionError decode(DCF77, DCF77Data(invalid_last_bit_data))
+        @test_throws AssertionError decode(DCF77, invalid_last_bit_data)
 
         # Test day of week consistency check
         invalid_day_of_week_data = base_data.x & ~(UInt64(0b111) << 42) | (UInt64(0b111) << 42)
-        @test_throws AssertionError decode(DCF77, DCF77Data(invalid_day_of_week_data))
+        @test_throws AssertionError decode(DCF77, invalid_day_of_week_data)
 
         # Test CET/CEST consistency with date
         # Create a date that should be in CET but signal indicates CEST
         invalid_timezone_consistency_data = base_data.x & ~(UInt64(0b11111) << 45) | (UInt64(1) << 45)
         invalid_timezone_consistency_data &= ~(UInt64(1) << 17)
         invalid_timezone_consistency_data |= (UInt64(1) << 18) | (UInt64(1) << 17)
-        @test_throws AssertionError decode(DCF77, DCF77Data(invalid_timezone_consistency_data))
+        @test_throws AssertionError decode(DCF77, invalid_timezone_consistency_data)
     end
 
     @testset "Pretty printing" begin
