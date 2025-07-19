@@ -80,45 +80,42 @@ julia> Int(decode_2digit_bcd(UInt64(0x23), 0, 7))
 - The high nibble (bits 4-7) represents the tens digit
 - The low nibble (bits 0-3) represents the ones digit
 """
-function decode_2digit_bcd(x::UInt64, lo::Int, hi::Int)
+function decode_2digit_bcd(x::UInt64)
     # Inspired by
     # https://github.com/Ox11/dcf77/blob/413f92ad16446cbfbfd1c7bed6dc67332c1453c6/src/lib.rs#L145-L152
     # Note: this assumes the input is a 2-digit BCD-encoded decimal number (∈ [0, 99]).
-    bcd = extract_bits(x, lo, hi)
-    high_nibble = (bcd & 0xF0) >> 4
-    low_nibble = bcd & 0x0F
+    high_nibble = (x & 0xF0) >> 4
+    low_nibble = x & 0x0F
     return high_nibble * 10 + low_nibble
 end
 
 """
-    parity(x::Integer, lo::Int, hi::Int)
+    parity(x::Integer)
 
 Calculate the (odd) parity for a range of bits.
 
-Returns `true` if the number of 1-bits in the specified range is odd, `false` if it's even.
+Returns `true` if the number of 1-bits is odd, `false` if it's even.
 This is used for error detection in data transmission.
 
 ## Arguments
 
 - `x::Integer`: The input integer to check parity for
-- `lo::Int`: The lowest bit position to include in parity calculation (0-based, inclusive)
-- `hi::Int`: The highest bit position to include in parity calculation (0-based, inclusive)
 
 ## Returns
 
-- `true` if the number of 1-bits in the range is odd
-- `false` if the number of 1-bits in the range is even
+- `true` if the number of 1-bits is odd
+- `false` if the number of 1-bits is even
 
 ## Examples
 
 ```jldoctest
 julia> using RadioClock: parity
 
-julia> parity(0b101010, 0, 7)
+julia> parity(0b101010)
 true
 
-julia> parity(0b101010, 2, 5)
+julia> parity(0b011101)
 false
 ```
 """
-parity(x::Integer, lo::Int, hi::Int) = isodd(count_ones(extract_bits(x, lo, hi)))
+parity(x::Integer) = isodd(count_ones(x))
