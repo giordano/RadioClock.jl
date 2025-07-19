@@ -1,28 +1,20 @@
 using LibSerialPort
 
-function read_dcf77_data!(times::AbstractVector{Int16}, signal::AbstractVector{Int16}, port::String, rate::Signed, milliseconds::Signed)
-    N = length(times)
-    @assert N == length(signal) "Times and Signal vectors must have same length"
+function read_dcf77_data!(signal::AbstractVector{T}, port::String, rate::Signed, milliseconds::Signed) where {T<:Integer}
+    N = length(signal)
+    delim = "\r\n"
+
     open(port, rate) do sp
         # First datapoint is often incomplete, just skip it
-        readuntil(sp, "\r\n")
+        readuntil(sp, delim)
 
-        idx = 1
-        while idx <= N
-            data = readuntil(sp, "\r\n")
-            ts = split(data, ",")
-            if length(ts) != 2
-                continue
-            end
-            t, s = tryparse.(Int16, ts)
-            if any(isnothing, (t, s))
-                continue
-            end
-            @inbounds times[idx], signal[idx] = t, s
-            idx += 1
+        @time for idx in eachindex(signal)
+            data = readuntil(sp, delim)
+            s = tryparse(T, data)
+            @inbounds signal[idx] = isnothing(s) ? -one(T) : s
         end
     end
-    return times, signal
+    return signal
 end
 
 # `millisecond` is the rate at which the data is written to the serial port, `time` is for
@@ -30,7 +22,6 @@ end
 # two figures.
 function read_dcf77_data(port::String, rate::Signed, milliseconds::Signed, time::Real)
     N = round(Int, time / milliseconds * 1000)
-    times  = zeros(Int16, N)
     signal = zeros(Int16, N)
-    return read_dcf77_data!(times, signal, port, rate, milliseconds)
+    return read_dcf77_data!(signal, port, rate, milliseconds)
 end
