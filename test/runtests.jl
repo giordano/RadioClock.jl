@@ -17,29 +17,31 @@ function encode_bcd(x::Integer)
     return result
 end
 
-# This function is defined only in the tests, but we want to make sure it works well,
-# because it's used below for other tests.
-@testset "Encoding BCD" begin
-    @test encode_bcd(0) == 0x0
-    @test encode_bcd(1) == 0x1
-    @test encode_bcd(2) == 0x2
-    @test encode_bcd(4) == 0x4
-    @test encode_bcd(6) == 0x6
-    @test encode_bcd(8) == 0x8
-    @test encode_bcd(9) == 0x9
-    @test encode_bcd(12) == 0x12
-    @test encode_bcd(42) == 0x42
-    @test encode_bcd(123) == 0x123
-    @test encode_bcd(578) == 0x578
-    @test encode_bcd(1234) == 0x1234
-    @test encode_bcd(7654) == 0x7654
-    @test encode_bcd(12345) == 0x12345
-    @test encode_bcd(67890) == 0x67890
-end
+@testset "BCD" begin
+    # This function is defined only in the tests, but we want to make sure it works well,
+    # because it's used below for other tests.
+    @testset "Encoding" begin
+        @test encode_bcd(0) == 0x0
+        @test encode_bcd(1) == 0x1
+        @test encode_bcd(2) == 0x2
+        @test encode_bcd(4) == 0x4
+        @test encode_bcd(6) == 0x6
+        @test encode_bcd(8) == 0x8
+        @test encode_bcd(9) == 0x9
+        @test encode_bcd(12) == 0x12
+        @test encode_bcd(42) == 0x42
+        @test encode_bcd(123) == 0x123
+        @test encode_bcd(578) == 0x578
+        @test encode_bcd(1234) == 0x1234
+        @test encode_bcd(7654) == 0x7654
+        @test encode_bcd(12345) == 0x12345
+        @test encode_bcd(67890) == 0x67890
+    end
 
-@testset "Decoding BCD" begin
-    for x in 0:99
-        @test decode_2digit_bcd(encode_bcd(x), 0, 7) == x
+    @testset "Decoding" begin
+        for x in 0:99
+            @test decode_2digit_bcd(encode_bcd(x), 0, 7) == x
+        end
     end
 end
 
