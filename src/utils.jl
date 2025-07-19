@@ -14,4 +14,4 @@ function decode_2digit_bcd(x::UInt64, lo::Int, hi::Int)
     return high_nibble * 10 + low_nibble
 end
 
-check_parity(x::Integer, lo::Int, hi::Int) = isodd(count_ones(extract_bits(x, lo, hi)))
+parity(x::Integer, lo::Int, hi::Int) = isodd(count_ones(extract_bits(x, lo, hi)))

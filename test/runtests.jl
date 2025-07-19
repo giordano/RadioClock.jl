@@ -1,5 +1,5 @@
 using Test
-using RadioClock: DCF77, DCF77Data, decode, decode_2digit_bcd, check_parity, extract_bits, RadioClock
+using RadioClock: DCF77, DCF77Data, decode, decode_2digit_bcd, parity, extract_bits, RadioClock
 using TimeZones: astimezone, FixedTimeZone, ZonedDateTime, @tz_str
 using Dates: dayofmonth, dayofweek, hour, Minute, minute, month, now, year, UTC
 
@@ -43,14 +43,14 @@ end
     end
 end
 
-@testset "Check parity" begin
-    @test  check_parity(0b1,  0, 0)
-    @test  check_parity(0b11, 0, 0)
-    @test !check_parity(0b11, 0, 1)
-    @test  check_parity(0b110110, 2, 5)
+@testset "Parity" begin
+    @test  parity(0b1,  0, 0)
+    @test  parity(0b11, 0, 0)
+    @test !parity(0b11, 0, 1)
+    @test  parity(0b110110, 2, 5)
 
     for x in UInt64(0):UInt64(99)
-        @test check_parity(x, 0, 7) == isodd(count_ones(extract_bits(x, 0, 7))) || error(x)
+        @test parity(x, 0, 8) == isodd(count_ones(extract_bits(x, 0, 8))) || error(x)
     end
 end
 
@@ -64,17 +64,17 @@ function encode_dcf77(zdt::ZonedDateTime)
     data |= true << 20
 
     data |= (encode_bcd(minute(zdt)) & 0b1111111) << 21
-    data |= check_parity(data, 21, 27) << 28
+    data |= parity(data, 21, 27) << 28
 
     data |= (encode_bcd(hour(zdt)) & 0b111111) << 29
-    data |= check_parity(data, 29, 34) << 35
+    data |= parity(data, 29, 34) << 35
 
     data |= (encode_bcd(dayofmonth(zdt)) & 0b111111) << 36
     data |= (encode_bcd(dayofweek(zdt)) & 0b111) << 42
     data |= (encode_bcd(month(zdt)) & 0b11111) << 45
     data |= (encode_bcd(year(zdt)) & 0b11111111) << 50
 
-    data |= check_parity(data, 36, 57) << 58
+    data |= parity(data, 36, 57) << 58
 
     return DCF77Data(data)
 end

@@ -45,10 +45,10 @@ function decode(::Type{DCF77}, data::DCF77Data)
     @assert Bool(data[20]) "21st bit of DCF77 signal must be 1"
 
     minutes = decode_2digit_bcd(data.x, 21, 27)
-    @assert check_parity(data.x, 21, 27) == data[28] "Minutes data is not consistent with parity check"
+    @assert parity(data.x, 21, 27) == data[28] "Minutes data is not consistent with parity check"
 
     hours = decode_2digit_bcd(data.x, 29, 34)
-    @assert check_parity(data.x, 29, 34) == data[35] "Hours data is not consistent with parity check"
+    @assert parity(data.x, 29, 34) == data[35] "Hours data is not consistent with parity check"
 
     day_month = decode_2digit_bcd(data.x, 36, 41)
     day_week = decode_2digit_bcd(data.x, 42, 44)
@@ -59,7 +59,7 @@ function decode(::Type{DCF77}, data::DCF77Data)
     # within a 400-year range) from day of the week.
     year = decode_2digit_bcd(data.x, 50, 57) + 2000
 
-    @assert check_parity(data.x, 36, 57) == Bool(data[58]) "Date data is not consistent with parity check"
+    @assert parity(data.x, 36, 57) == Bool(data[58]) "Date data is not consistent with parity check"
 
     @assert iszero(data[59]) "Last bit must be 0"
     # Ignore leap second for the time being.
