@@ -47,19 +47,15 @@ function extract_bits(x::Integer, lo::Int, hi::Int)
 end
 
 """
-    decode_2digit_bcd(x::UInt64, lo::Int, hi::Int)
+    decode_2digit_bcd(x::UInt64)
 
-Decode a 2-digit BCD (Binary-Coded Decimal) number from a bit range.
+Decode a 2-digit BCD (Binary-Coded Decimal) number from an integer.
 
-Extracts bits from the specified range and decodes them as a 2-digit BCD number.
-BCD encoding stores each decimal digit as a 4-bit binary number, so a 2-digit
-number requires 8 bits total.
+BCD encoding stores each decimal digit as a 4-bit binary number, so a 2-digit number requires 8 bits total.
 
 ## Arguments
 
 - `x::UInt64`: The input integer containing the BCD-encoded data
-- `lo::Int`: The lowest bit position of the BCD data (0-based, inclusive)
-- `hi::Int`: The highest bit position of the BCD data (0-based, inclusive)
 
 ## Returns
 
@@ -70,7 +66,7 @@ number requires 8 bits total.
 ```jldoctest
 julia> using RadioClock: decode_2digit_bcd
 
-julia> Int(decode_2digit_bcd(UInt64(0x23), 0, 7))
+julia> Int(decode_2digit_bcd(UInt64(0x23)))
 23
 ```
 
