@@ -120,7 +120,7 @@ function decode(::Type{DCF77}, data::DCF77Data)
 
     @assert iszero(data[0]) "1st bit of DCF77 signal must be 0"
 
-    summer_time_announcement = Bool(data[15])
+    summer_time_announcement = Bool(data[16])
     cest_in_effect = Bool(data[17])
     cet_in_effect = Bool(data[18])
     # Consistency check
