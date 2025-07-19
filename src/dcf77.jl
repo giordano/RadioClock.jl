@@ -157,3 +157,10 @@ function decode(::Type{DCF77}, data::DCF77Data)
 end
 
 decode(::Type{DCF77}, data::Union{UInt64,String}) = decode(DCF77, DCF77Data(data))
+
+# Simple precompile statements
+let
+    precompile(decode, (Type{DCF77}, DCF77Data))
+    precompile(decode, (Type{DCF77}, UInt64))
+    precompile(decode, (Type{DCF77}, String))
+end
