@@ -31,7 +31,8 @@ function read_dcf77_data(port::String, rate::Signed, milliseconds::Signed, time:
     return read_dcf77_data!(signal, port, rate, milliseconds; plot)
 end
 
-function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Signed)
+# `threshold` is the expected minimum height of the pulse
+function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Signed; threshold::Signed=400)
     @assert milliseconds < 100 "The read frequency must be less than one every 100ms, found $(milliseconds)ms"
     zero_length = round(Int, 100 / milliseconds)
     one_length = round(Int, 200 / milliseconds)
@@ -42,15 +43,12 @@ function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Signed
     # expected number of datapoints in a slightly shorter window (1.5s).
     fiftynine_window = ceil(Int, 1.5 * second_length)
 
-    # Expected minimum height of the pulse
-    threshold = 400
-
     waiting = true
     done = false
     data = UInt64(0)
     second_start = firstindex(signal)
-    second_done = false
-    second = -1
+    second_done = true
+    second = 0
 
     # Wait for the beginning of the minute
     for idx in eachindex(signal)
@@ -58,13 +56,13 @@ function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Signed
             if idx > fiftynine_window && all(<=(0), @view(signal[max(begin, idx - 1 - fiftynine_window):max(begin, idx-1)])) && signal[idx] > threshold
                 waiting = false
                 second_start = idx
-                @info "Signal started" second_start
             else
+                # We are waiting for the beginning of the signal, but didn't find it yet: keep going.
                 continue
             end
         end
 
-        # We are done waiting, we're reading the data now. Exciting times!
+        # Signal started, we're reading the data now. Exciting times!
         if second < 59
             if second_done && idx > second_start + 0.9 * second_length && signal[idx] > threshold
                 # This is the beginning of a new second
@@ -77,14 +75,12 @@ function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Signed
                 pulse_count = count(>(threshold), @view(signal[second_start:idx]))
                 if zero_length * 0.8 < pulse_count < zero_length * 1.2
                     # This is a 0 bit
-                    @info "" second 0
                     second_done = true
                     continue
                 elseif one_length * 0.8 < pulse_count < one_length * 1.2
                     # This is a 1 bit
                     data |= 1 << second
                     second_done = true
-                    @info "" second 1
                     continue
                 else
                     error("Something wrong at second $(second): this bit isn't 0 nor 1")
