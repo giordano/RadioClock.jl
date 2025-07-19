@@ -1,6 +1,8 @@
 using TimeZones: FixedTimeZone, ZonedDateTime, @tz_str
 using Dates: dayofweek
 
+export DCF77Data
+
 struct DCF77Data
     x::UInt64
 
