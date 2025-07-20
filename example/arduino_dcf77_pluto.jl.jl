@@ -102,14 +102,6 @@ data = read_and_decode(rsignal, 10)
 # ╔═╡ f0a0abac-7dfd-4c2b-a663-91bfb6e0dd1d
 RadioClock.decode(DCF77, data)
 
-# ╔═╡ 664818b8-d235-4b93-bdd7-241e845ae161
-let
-	display(PlutoPlotly.plot(sin.(0:0.1:10)))
-end
-
-# ╔═╡ 7c7e0311-38a6-4ae6-b399-ab711bc59e57
-
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -795,7 +787,5 @@ version = "17.4.0+2"
 # ╠═fbc1ba16-a12c-4dd2-9ab4-f66ebec242e4
 # ╠═6772c48f-c131-4117-a8f7-ae45433d16ec
 # ╠═f0a0abac-7dfd-4c2b-a663-91bfb6e0dd1d
-# ╠═664818b8-d235-4b93-bdd7-241e845ae161
-# ╠═7c7e0311-38a6-4ae6-b399-ab711bc59e57
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

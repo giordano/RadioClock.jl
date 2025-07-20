@@ -138,7 +138,8 @@ function read_and_decode(port::String, rate::Signed, milliseconds::Signed, time:
                 if idx > fiftynine_window && all(<=(0), @view(signal[max(begin, idx - 1 - fiftynine_window):max(begin, idx-1)])) && signal[idx] > threshold
                     waiting = false
                     second_start = idx
-                    @info "Started reading" Dates.now(UTC)
+                    now = astimezone(ZonedDateTime(Dates.now(UTC), tz"UTC"), tz"Europe/Berlin")
+                    @info "Started reading" now
                 else
                     # We are waiting for the beginning of the signal, but didn't find it yet: keep going.
                     continue
@@ -181,6 +182,6 @@ function read_and_decode(port::String, rate::Signed, milliseconds::Signed, time:
 
     now = astimezone(ZonedDateTime(Dates.now(UTC), tz"UTC"), tz"Europe/Berlin")
     decoded = RadioClock.decode(DCF77, data)
-    @info "Finished!" decoded now (now - decoded)
+    @info "Finished!" data decoded now (now - decoded)
     return nothing # DCF77Data(data)
 end
