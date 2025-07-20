@@ -118,25 +118,25 @@ function decode(::Type{DCF77}, data::DCF77Data)
     # * https://www.ptb.de/cms/en/ptb/fachabteilungen/abt4/fb-44/ag-442/dissemination-of-legal-time/dcf77/dcf77-time-code.html
     # * https://en.wikipedia.org/wiki/DCF77#Time_code_interpretation
 
-    @assert iszero(data[0]) "1st bit of DCF77 signal must be 0"
+    @assert iszero(data[0]) "1st bit of DCF77 signal must be 0. Input was 0x$(string(data.x; base=16))"
 
     summer_time_announcement = Bool(data[16])
     cest_in_effect = Bool(data[17])
     cet_in_effect = Bool(data[18])
     # Consistency check
-    @assert cest_in_effect != cet_in_effect "CET/CEST data is inconsistent"
+    @assert cest_in_effect != cet_in_effect "CET/CEST data is inconsistent. Input was 0x$(string(data.x; base=16))"
 
     leap_second_announcement = data[19]
 
-    @assert Bool(data[20]) "21st bit of DCF77 signal must be 1"
+    @assert Bool(data[20]) "21st bit of DCF77 signal must be 1. Input was 0x$(string(data.x; base=16))"
 
     minutes_data = data[21:27]
     minutes = decode_2digit_bcd(minutes_data)
-    @assert parity(minutes_data) == data[28] "Minutes data is not consistent with parity check"
+    @assert parity(minutes_data) == data[28] "Minutes data is not consistent with parity check. Input was 0x$(string(data.x; base=16))"
 
     hours_data = data[29:34]
     hours = decode_2digit_bcd(hours_data)
-    @assert parity(hours_data) == data[35] "Hours data is not consistent with parity check"
+    @assert parity(hours_data) == data[35] "Hours data is not consistent with parity check. Input was 0x$(string(data.x; base=16))"
 
     day_month = decode_2digit_bcd(data[36:41])
     day_week = decode_2digit_bcd(data[42:44])
@@ -147,18 +147,18 @@ function decode(::Type{DCF77}, data::DCF77Data)
     # within a 400-year range) from day of the week.
     year = decode_2digit_bcd(data[50:57]) + 2000
 
-    @assert parity(data[36:57]) == Bool(data[58]) "Date data is not consistent with parity check"
+    @assert parity(data[36:57]) == Bool(data[58]) "Date data is not consistent with parity check. Input was 0x$(string(data.x; base=16))"
 
-    @assert iszero(data[59]) "Last bit must be 0"
+    @assert iszero(data[59]) "Last bit must be 0. Input was 0x$(string(data.x; base=16))"
     # Ignore leap second for the time being.
 
     zdt = ZonedDateTime(year, month, day_month, hours, minutes, tz"Europe/Berlin", cest_in_effect)
     # More consistency checks
-    @assert dayofweek(zdt) == day_week "Day of the week data is not consistent"
-    @assert FixedTimeZone(zdt) == FixedTimeZone(cet_in_effect ? "CET" : "CEST", 3600, cet_in_effect ? 0 : 3600) "CET/CEST data is not consistent with date"
+    @assert dayofweek(zdt) == day_week "Day of the week data ($(day_week)) is not consistent with date ($(zdt)). Input was 0x$(string(data.x; base=16))"
+    @assert FixedTimeZone(zdt) == FixedTimeZone(cet_in_effect ? "CET" : "CEST", 3600, cet_in_effect ? 0 : 3600) "CET ($(cet_in_effect))/CEST ($(cest_in_effect)) data is not consistent with date ($(zdt)). Input was 0x$(string(data.x; base=16))"
     next_switch = next_transition_instant(zdt)
     if !isnothing(next_switch)
-        @assert summer_time_announcement == (next_switch - zdt <= Hour(1)) "Summer time announcement data is not consistent with date"
+        @assert summer_time_announcement == (next_switch - zdt <= Hour(1)) "Summer time announcement bit ($(summer_time_announcement)) is not consistent with date ($(zdt)). Input was 0x$(string(data.x; base=16))"
     end
 
     return zdt
