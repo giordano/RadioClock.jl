@@ -1,4 +1,4 @@
-using TimeZones: FixedTimeZone, next_transition_instant, ZonedDateTime, @tz_str
+using TimeZones: astimezone, FixedTimeZone, next_transition_instant, ZonedDateTime, @tz_str
 using Dates: dayofmonth, dayofweek, Hour, hour, minute, month, year
 
 export DCF77Data
@@ -207,6 +207,7 @@ Binary representation: 000000000000000001001100110010110000010000001100100000100
 - The inverse of this function, for dates within the 21st century, is [`decode(::Type{DCF77}, data::DCF77Data)`](@ref)
 """
 function encode(::Type{DCF77}, zdt::ZonedDateTime)
+    zdt = astimezone(zdt, tz"Europe/Berlin")
     data = UInt64(0)
 
     next_switch = next_transition_instant(zdt)
