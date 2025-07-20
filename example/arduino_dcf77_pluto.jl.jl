@@ -7,6 +7,9 @@ using InteractiveUtils
 # ╔═╡ 20804049-a5c4-4708-80eb-3cc33b098496
 using RadioClock
 
+# ╔═╡ 117790a8-884c-4671-aa1c-2f4357eee371
+using Dates, TimeZones
+
 # ╔═╡ 092b1ae5-ab90-47ff-846d-ff1fc96352ca
 using PlutoPlotly: PlutoPlotly
 
@@ -99,17 +102,28 @@ data = read_and_decode(rsignal, 10)
 # ╔═╡ f0a0abac-7dfd-4c2b-a663-91bfb6e0dd1d
 RadioClock.decode(DCF77, data)
 
+# ╔═╡ 664818b8-d235-4b93-bdd7-241e845ae161
+let
+	display(PlutoPlotly.plot(sin.(0:0.1:10)))
+end
+
+# ╔═╡ 7c7e0311-38a6-4ae6-b399-ab711bc59e57
+
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 PlotlyJS = "f0f68f2c-4968-5e81-91da-67840de0976a"
 PlutoPlotly = "8e989ff0-3d88-8e9f-f020-2b208a939ff0"
 RadioClock = "494dee28-fb50-4d66-82c2-2f703a44d82e"
+TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 
 [compat]
 PlotlyJS = "~0.18.16"
 PlutoPlotly = "~0.6.4"
 RadioClock = "~0.1.0"
+TimeZones = "~1.22.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -118,7 +132,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.6"
 manifest_format = "2.0"
-project_hash = "09f5b56e3f85584ad5fdb3b3e44c11cc1931767e"
+project_hash = "d32522fb03241291caff5442fd82022b9192748c"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -773,12 +787,15 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╠═20804049-a5c4-4708-80eb-3cc33b098496
+# ╠═117790a8-884c-4671-aa1c-2f4357eee371
 # ╠═8872e6fe-aa82-4158-92bf-31a8b10ed257
 # ╠═092b1ae5-ab90-47ff-846d-ff1fc96352ca
 # ╠═df67f8e0-725f-4ad7-bd22-ab00a7ac50d9
 # ╠═f96a9285-9dfd-4db1-8956-130c4ce5b521
-# ╟─fbc1ba16-a12c-4dd2-9ab4-f66ebec242e4
+# ╠═fbc1ba16-a12c-4dd2-9ab4-f66ebec242e4
 # ╠═6772c48f-c131-4117-a8f7-ae45433d16ec
 # ╠═f0a0abac-7dfd-4c2b-a663-91bfb6e0dd1d
+# ╠═664818b8-d235-4b93-bdd7-241e845ae161
+# ╠═7c7e0311-38a6-4ae6-b399-ab711bc59e57
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
