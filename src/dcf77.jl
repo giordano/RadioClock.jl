@@ -1,5 +1,5 @@
-using TimeZones: FixedTimeZone, ZonedDateTime, @tz_str
-using Dates: dayofweek
+using TimeZones: FixedTimeZone, next_transition_instant, ZonedDateTime, @tz_str
+using Dates: dayofweek, Hour
 
 export DCF77Data
 
@@ -156,6 +156,10 @@ function decode(::Type{DCF77}, data::DCF77Data)
     # More consistency checks
     @assert dayofweek(zdt) == day_week "Day of the week data is not consistent"
     @assert FixedTimeZone(zdt) == FixedTimeZone(cet_in_effect ? "CET" : "CEST", 3600, cet_in_effect ? 0 : 3600) "CET/CEST data is not consistent with date"
+    next_switch = next_transition_instant(zdt)
+    if !isnothing(next_switch)
+        @assert summer_time_announcement == (next_switch - zdt <= Hour(1)) "Summer time announcement data is not consistent with date"
+    end
 
     return zdt
 end

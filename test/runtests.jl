@@ -1,7 +1,7 @@
 using Test
 using RadioClock: DCF77, DCF77Data, decode, decode_2digit_bcd, parity, extract_bits, RadioClock
-using TimeZones: astimezone, FixedTimeZone, ZonedDateTime, @tz_str
-using Dates: dayofmonth, dayofweek, hour, Minute, minute, month, now, year, UTC
+using TimeZones: astimezone, FixedTimeZone, next_transition_instant, ZonedDateTime, @tz_str
+using Dates: dayofmonth, dayofweek, Hour, hour, Minute, minute, month, now, year, UTC
 
 function encode_bcd(x::Integer)
     result = UInt64(0)
@@ -59,6 +59,10 @@ end
 function encode_dcf77(zdt::ZonedDateTime)
     data = UInt64(0)
 
+    next_switch = next_transition_instant(zdt)
+    if !isnothing(next_switch)
+        data |= (next_switch - zdt <= Hour(1)) << 16
+    end
     tz = FixedTimeZone(zdt)
     data |= (tz == FixedTimeZone("CEST", 3600, 3600)) << 17
     data |= !Bool(extract_bits(data, 17, 17)) << 18
@@ -123,9 +127,16 @@ end
         # Test first bit must be 0
         @test_throws AssertionError decode(DCF77, DCF77Data(UInt64(1)))
 
+        base_data = DCF77Data("000000000000000001001000100100000011111010001111001010010010")
+        # Inconsistent summer time announcement (announcement bit is set, but next hour time doesn't switch)
+        inconsistent_summer_time_announcement_data = base_data.x | (UInt64(1) << 16)
+        @test_throws AssertionError decode(DCF77, inconsistent_summer_time_announcement_data)
+
+        # Inconsistent summer time announcement (announcement bit is not set, but next hour time switches)
+        @test_throws AssertionError decode(DCF77, "000000000000000000101110000001000001100011111110000000110000")
+
         # Test CET/CEST consistency check
         # Both CET and CEST set to true (inconsistent)
-        base_data = DCF77Data("000000000000000001001000100100000011111010001111001010010010")
         invalid_cet_cest_data = base_data.x | (UInt64(1) << 17) | (UInt64(1) << 18)
         @test_throws AssertionError decode(DCF77, invalid_cet_cest_data)
 
