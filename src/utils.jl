@@ -85,6 +85,20 @@ function decode_2digit_bcd(x::UInt64)
     return high_nibble * 10 + low_nibble
 end
 
+function encode_bcd(x::Integer)
+    result = UInt64(0)
+    shift = UInt64(0)
+
+    while !iszero(x)
+        digit = x % 10
+        result |= UInt64(digit) << shift
+        x ÷= 10
+        shift += 4 # Each BCD digit uses 4 bits
+    end
+
+    return result
+end
+
 """
     parity(x::Integer)
 

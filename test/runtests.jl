@@ -1,25 +1,9 @@
 using Test
-using RadioClock: DCF77, DCF77Data, decode, decode_2digit_bcd, parity, extract_bits, RadioClock
-using TimeZones: astimezone, FixedTimeZone, next_transition_instant, ZonedDateTime, @tz_str
-using Dates: dayofmonth, dayofweek, Hour, hour, Minute, minute, month, now, year, UTC
-
-function encode_bcd(x::Integer)
-    result = UInt64(0)
-    shift = UInt64(0)
-
-    while !iszero(x)
-        digit = x % 10
-        result |= UInt64(digit) << shift
-        x ÷= 10
-        shift += 4 # Each BCD digit uses 4 bits
-    end
-
-    return result
-end
+using RadioClock: DCF77, DCF77Data, decode, decode_2digit_bcd, encode, encode_bcd, extract_bits, parity
+using TimeZones: ZonedDateTime, @tz_str
+using Dates: Minute
 
 @testset "BCD" begin
-    # This function is defined only in the tests, but we want to make sure it works well,
-    # because it's used below for other tests.
     @testset "Encoding" begin
         @test encode_bcd(0) == 0x0
         @test encode_bcd(1) == 0x1
@@ -56,49 +40,15 @@ end
     end
 end
 
-function encode_dcf77(zdt::ZonedDateTime)
-    data = UInt64(0)
-
-    next_switch = next_transition_instant(zdt)
-    if !isnothing(next_switch)
-        data |= (next_switch - zdt <= Hour(1)) << 16
-    end
-    tz = FixedTimeZone(zdt)
-    data |= (tz == FixedTimeZone("CEST", 3600, 3600)) << 17
-    data |= !Bool(extract_bits(data, 17, 17)) << 18
-
-    data |= true << 20
-
-    data |= (encode_bcd(minute(zdt)) & 0b1111111) << 21
-    data |= parity(extract_bits(data, 21, 27)) << 28
-
-    data |= (encode_bcd(hour(zdt)) & 0b111111) << 29
-    data |= parity(extract_bits(data, 29, 34)) << 35
-
-    data |= (encode_bcd(dayofmonth(zdt)) & 0b111111) << 36
-    data |= (encode_bcd(dayofweek(zdt)) & 0b111) << 42
-    data |= (encode_bcd(month(zdt)) & 0b11111) << 45
-    data |= (encode_bcd(year(zdt)) & 0b11111111) << 50
-
-    data |= parity(extract_bits(data, 36, 57)) << 58
-
-    return DCF77Data(data)
-end
-
-function encode_dcf77(year::Integer, month::Integer, day::Integer, hour::Integer, minute::Integer)
-    zdt = ZonedDateTime(year, month, day, hour, minute, tz"Europe/Berlin")
-    return encode_dcf77(zdt)
-end
-
 @testset "DCF77" begin
     berlin(x...) = ZonedDateTime(x..., tz"Europe/Berlin")
 
     @testset "Encoder" begin
-        @test encode_dcf77(berlin(2025,  7, 17, 20, 48)) == DCF77Data("000000000000000001001000100100000011111010001111001010010010")
-        @test encode_dcf77(berlin(2019,  6, 16, 14, 32)) == DCF77Data("000000000000000001001010011010010100011010111011001001100010")
-        @test encode_dcf77(berlin(2009,  6, 13, 10, 09)) == DCF77Data("000000000000000001001100100000000101110010011011001001000010")
-        @test encode_dcf77(berlin(2000, 10,  7,  3, 59)) == DCF77Data("000000000000000001001100110101100000111000011000010000000000")
-        @test encode_dcf77(berlin(2033,  2, 23, 11, 49)) == DCF77Data("000000000000000000101100100111000100110001110010001100110000")
+        @test encode(DCF77, berlin(2025,  7, 17, 20, 48)) == DCF77Data("000000000000000001001000100100000011111010001111001010010010")
+        @test encode(DCF77, berlin(2019,  6, 16, 14, 32)) == DCF77Data("000000000000000001001010011010010100011010111011001001100010")
+        @test encode(DCF77, berlin(2009,  6, 13, 10, 09)) == DCF77Data("000000000000000001001100100000000101110010011011001001000010")
+        @test encode(DCF77, berlin(2000, 10,  7,  3, 59)) == DCF77Data("000000000000000001001100110101100000111000011000010000000000")
+        @test encode(DCF77, berlin(2033,  2, 23, 11, 49)) == DCF77Data("000000000000000000101100100111000100110001110010001100110000")
     end
 
     @testset "Decoder" begin
@@ -115,7 +65,7 @@ end
 
         # Roundtrip of encoding/decoding for a large number of datetimes
         for dt in berlin(2000, 1, 11, 0, 0):Minute(13):berlin(2038, 3, 28, 1, 0)
-            @test decode(DCF77, encode_dcf77(dt)) == dt
+            @test decode(DCF77, encode(DCF77, dt)) == dt
         end
     end
 

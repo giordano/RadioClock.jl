@@ -1,5 +1,5 @@
 using TimeZones: FixedTimeZone, next_transition_instant, ZonedDateTime, @tz_str
-using Dates: dayofweek, Hour
+using Dates: dayofmonth, dayofweek, Hour, hour, minute, month, year
 
 export DCF77Data
 
@@ -166,9 +166,45 @@ end
 
 decode(::Type{DCF77}, data::Union{UInt64,String}) = decode(DCF77, DCF77Data(data))
 
+function encode(::Type{DCF77}, zdt::ZonedDateTime)
+    data = UInt64(0)
+
+    next_switch = next_transition_instant(zdt)
+    if !isnothing(next_switch)
+        data |= (next_switch - zdt <= Hour(1)) << 16
+    end
+    tz = FixedTimeZone(zdt)
+    data |= (tz == FixedTimeZone("CEST", 3600, 3600)) << 17
+    data |= !Bool(extract_bits(data, 17, 17)) << 18
+
+    data |= true << 20
+
+    data |= (encode_bcd(minute(zdt)) & 0b1111111) << 21
+    data |= parity(extract_bits(data, 21, 27)) << 28
+
+    data |= (encode_bcd(hour(zdt)) & 0b111111) << 29
+    data |= parity(extract_bits(data, 29, 34)) << 35
+
+    data |= (encode_bcd(dayofmonth(zdt)) & 0b111111) << 36
+    data |= (encode_bcd(dayofweek(zdt)) & 0b111) << 42
+    data |= (encode_bcd(month(zdt)) & 0b11111) << 45
+    data |= (encode_bcd(year(zdt)) & 0b11111111) << 50
+
+    data |= parity(extract_bits(data, 36, 57)) << 58
+
+    return DCF77Data(data)
+end
+
+function encode(::Type{DCF77}, year::Integer, month::Integer, day::Integer, hour::Integer, minute::Integer)
+    zdt = ZonedDateTime(year, month, day, hour, minute, tz"Europe/Berlin")
+    return encode(DCF77, zdt)
+end
+
 # Simple precompile statements
 let
     precompile(decode, (Type{DCF77}, DCF77Data))
     precompile(decode, (Type{DCF77}, UInt64))
     precompile(decode, (Type{DCF77}, String))
+    precompile(encode, (Type{DCF77}, ZonedDateTime))
+    precompile(encode, (Type{DCF77}, Int, Int, Int, Int, Int))
 end
