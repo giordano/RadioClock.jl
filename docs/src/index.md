@@ -14,6 +14,7 @@ This is the reference documentation of [`RadioClock.jl`](https://github.com/gior
 RadioClock.DCF77
 RadioClock.DCF77Data
 RadioClock.decode(::Type{DCF77}, data::DCF77Data)
+RadioClock.encode(::Type{DCF77}, zdt::ZonedDateTime)
 ```
 
 ## Internal utilities, non-public API
@@ -21,6 +22,7 @@ RadioClock.decode(::Type{DCF77}, data::DCF77Data)
 ```@docs
 RadioClock.extract_bits
 RadioClock.decode_2digit_bcd
+RadioClock.encode_bcd
 RadioClock.parity
 RadioClock.RadioSignal
 ```

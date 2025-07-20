@@ -69,7 +69,7 @@ function Base.show(io::IO, x::DCF77Data)
 end
 
 """
-    RadioClock.decode(DCF77, data::Union{DCF77Data,UInt64,String})
+    RadioClock.decode(DCF77, data::Union{DCF77Data,UInt64,String}) :: TimeZones.ZonedDateTime
 
 Decode [DCF77](https://en.wikipedia.org/wiki/DCF77) signal data into a `TimeZones.ZonedDateTime`.
 
@@ -101,17 +101,22 @@ julia> RadioClock.decode(DCF77, "00000000000000000100110101001000001101001011111
 2037-07-12T20:15:00+02:00
 
 julia> RadioClock.decode(DCF77, DCF77Data("000000000000000001101011000110100001100010001100011000010010"))
-ERROR: AssertionError: CET/CEST data is inconsistent
+ERROR: AssertionError: CET/CEST data is inconsistent. Input was 0x486311858d60000
 [...]
 
 julia> RadioClock.decode(DCF77, "000000000000000001001111001000100100000100001101001000110000")
-ERROR: AssertionError: Date data is not consistent with parity check
+ERROR: AssertionError: Date data is not consistent with parity check. Input was 0xc4b08244f20000
+[...]
+
+julia> RadioClock.decode(DCF77, "000000000000000001001111010110100001011001111000010001000000")
+ERROR: AssertionError: Summer time announcement bit (false) is not consistent with date (2008-10-26T02:57:00+02:00). Input was 0x221e685af20000
 [...]
 ```
 
 ## Notes
 
 - Currently this assumes the year is in the 21st century (2000-2099), as the DCF77 signal is ambiguous about the century
+- The inverse of this function is [`encode(::Type{DCF77}, zdt::ZonedDateTime)`](@ref)
 """
 function decode(::Type{DCF77}, data::DCF77Data)
     # See:
@@ -166,6 +171,41 @@ end
 
 decode(::Type{DCF77}, data::Union{UInt64,String}) = decode(DCF77, DCF77Data(data))
 
+"""
+    RadioClock.encode(DCF77, zdt::TimeZones.ZonedDateTime) :: DCF77Data
+    RadioClock.encode(DCF77, year::Integer, month::Integer, day::Integer, hour::Integer, minute::Integer) :: DCF77Data
+
+Encode a `TimeZones.ZonedDateTime` using the [DCF77](https://en.wikipedia.org/wiki/DCF77) format.
+
+## Arguments
+
+- [`DCF77`](@ref): The signal type (DCF77)
+- the date time in the [German time zone](https://en.wikipedia.org/wiki/Time_in_Germany) as either
+  - a single `zdt::TimeZones.ZonedDateTime` object, representing the date time
+  - or the sequence of the individual date time parts `year::Integer`, `month::Integer`, `day::Integer`, `hour::Integer`, `minute::Integer`
+
+## Returns
+
+- A [`DCF77Data`](@ref) object, holding the DCF77-like signal data
+
+## Examples
+
+```jldoctest
+julia> using RadioClock, TimeZones
+
+julia> RadioClock.encode(DCF77, ZonedDateTime(2014, 3, 30, 1, 18, tz"Europe/Berlin", 1))
+Date: 2014-03-30T01:18:00+01:00
+Binary representation: 000000000000000010101000110001000001000011111110000010100010
+
+julia> RadioClock.encode(DCF77, 2010, 9, 2, 6, 19)
+Date: 2010-09-02T06:19:00+02:00
+Binary representation: 000000000000000001001100110010110000010000001100100000100010
+```
+
+## Notes
+
+- The inverse of this function, for dates within the 21st century, is [`decode(::Type{DCF77}, data::DCF77Data)`](@ref)
+"""
 function encode(::Type{DCF77}, zdt::ZonedDateTime)
     data = UInt64(0)
 

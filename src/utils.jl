@@ -47,9 +47,9 @@ function extract_bits(x::Integer, lo::Int, hi::Int)
 end
 
 """
-    decode_2digit_bcd(x::UInt64)
+    decode_2digit_bcd(x::UInt64) :: UInt64
 
-Decode a 2-digit BCD (Binary-Coded Decimal) number from an integer.
+Decode a 2-digit decimal integer encoded with the [BCD (Binary-Coded Decimal)](https://en.wikipedia.org/wiki/Binary-coded_decimal) format.
 
 BCD encoding stores each decimal digit as a 4-bit binary number, so a 2-digit number requires 8 bits total.
 
@@ -59,14 +59,17 @@ BCD encoding stores each decimal digit as a 4-bit binary number, so a 2-digit nu
 
 ## Returns
 
-- An integer representing the decoded decimal value (0-99)
+- The integer ∈ [0, 99] representing the decoded decimal value of the input number, as a `UInt64`
 
 ## Examples
 
 ```jldoctest
 julia> using RadioClock: decode_2digit_bcd
 
-julia> Int(decode_2digit_bcd(UInt64(0x23)))
+julia> decode_2digit_bcd(UInt64(0x23))
+0x0000000000000017
+
+julia> Int(ans)
 23
 ```
 
@@ -75,6 +78,7 @@ julia> Int(decode_2digit_bcd(UInt64(0x23)))
 - Assumes the input is a valid 2-digit BCD number in the range [0, 99]
 - The high nibble (bits 4-7) represents the tens digit
 - The low nibble (bits 0-3) represents the ones digit
+- The inverse of this function is [`encode_bcd`](@ref)
 """
 function decode_2digit_bcd(x::UInt64)
     # Inspired by
@@ -85,6 +89,35 @@ function decode_2digit_bcd(x::UInt64)
     return high_nibble * 10 + low_nibble
 end
 
+"""
+    encode_bcd(x::Integer) :: UInt64
+
+Encode an integer using the [BCD (Binary-Coded Decimal)](https://en.wikipedia.org/wiki/Binary-coded_decimal) format.
+
+## Arguments
+
+- `x::Integer`: The input integer to be encoded
+
+## Returns
+
+- The BCD encoding of the input number as a `UInt64` number
+
+## Examples
+
+```jldoctest
+julia> using RadioClock: encode_bcd
+
+julia> encode_bcd(123)
+0x0000000000000123
+
+julia> encode_bcd(4296)
+0x0000000000004296
+```
+
+## Notes
+
+- The inverse of this function, for 2-digit decimal integers only, is [`decode_2digit_bcd`](@ref)
+"""
 function encode_bcd(x::Integer)
     result = UInt64(0)
     shift = UInt64(0)
@@ -100,7 +133,7 @@ function encode_bcd(x::Integer)
 end
 
 """
-    parity(x::Integer)
+    parity(x::Integer) :: Bool
 
 Calculate the (odd) parity for a range of bits.
 

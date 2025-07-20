@@ -1,4 +1,4 @@
-using Documenter, RadioClock
+using Documenter, RadioClock, TimeZones
 
 makedocs(
     modules = [RadioClock],
