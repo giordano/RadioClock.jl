@@ -3,7 +3,7 @@ using RadioClock
 using Dates
 using TimeZones
 
-function read_dcf77_data!(signal::AbstractVector{T}, port::String, rate::Signed, milliseconds::Signed; plot::Bool=false) where {T<:Integer}
+function read_dcf77_data!(signal::AbstractVector{T}, port::String, rate::Signed, milliseconds::Real; plot::Bool=false) where {T<:Integer}
     N = length(signal)
     delim = "\r\n"
 
@@ -23,14 +23,14 @@ end
 # `millisecond` is the rate at which the data is written to the serial port, `time` is for
 # how long we want to read the data, the length of the data arrays is inferred from these
 # two figures.
-function read_dcf77_data(port::String, rate::Signed, milliseconds::Signed, time::Real; plot::Bool=false)
+function read_dcf77_data(port::String, rate::Signed, milliseconds::Real, time::Real; plot::Bool=false)
     N = round(Int, time / milliseconds * 1000)
     signal = zeros(Int16, N)
     return read_dcf77_data!(signal, port, rate, milliseconds; plot)
 end
 
 # `threshold` is the expected minimum height of the pulse
-function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Signed; threshold::Signed=400)
+function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Real; threshold::Signed=400)
     @assert milliseconds < 100 "The read frequency must be less than one every 100ms, found $(milliseconds)ms"
     zero_length = round(Int, 100 / milliseconds)
     one_length = round(Int, 200 / milliseconds)
@@ -99,7 +99,7 @@ function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Signed
 end
 
 
-function read_and_decode(port::String, rate::Signed, milliseconds::Signed, time::Real; threshold::Signed=400)
+function read_and_decode(port::String, rate::Signed, milliseconds::Real, time::Real; threshold::Signed=400)
     @assert milliseconds < 100 "The read frequency must be less than one every 100ms, found $(milliseconds)ms"
     zero_length = round(Int, 100 / milliseconds)
     one_length = round(Int, 200 / milliseconds)
