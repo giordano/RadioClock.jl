@@ -86,7 +86,7 @@ function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Real; 
                     # Only for debugging
                     second_done = true
                     @info "" second pulse_count
-                    continue
+                    # continue
 
                     error("Something wrong at second $(second): this bit isn't 0 nor 1")
                 end
