@@ -73,11 +73,11 @@ function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Real; 
 
             if !second_done && idx > second_start + 1.5 * one_length
                 pulse_count = count(>(threshold), @view(signal[second_start:idx]))
-                if zero_length * 0.8 < pulse_count < zero_length * 1.2
+                if max(2, zero_length * 0.3) <= pulse_count < zero_length * 1.4
                     # This is a 0 bit
                     second_done = true
                     continue
-                elseif one_length * 0.8 < pulse_count < one_length * 1.2
+                elseif one_length * 0.7 < pulse_count < one_length * 1.4
                     # This is a 1 bit
                     data |= 1 << second
                     second_done = true
@@ -157,11 +157,11 @@ function read_and_decode(port::String, rate::Signed, milliseconds::Real, time::R
 
                 if !second_done && idx > second_start + 1.5 * one_length
                     pulse_count = count(>(threshold), @view(signal[second_start:idx]))
-                    if zero_length * 0.8 < pulse_count < zero_length * 1.2
+                    if max(2, zero_length * 0.3) <= pulse_count < zero_length * 1.4
                         # This is a 0 bit
                         second_done = true
                         continue
-                    elseif one_length * 0.8 < pulse_count < one_length * 1.2
+                    elseif one_length * 0.7 < pulse_count < one_length * 1.4
                         # This is a 1 bit
                         data |= 1 << second
                         second_done = true
