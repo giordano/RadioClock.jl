@@ -77,7 +77,7 @@ function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Real; 
                     # This is a 0 bit
                     second_done = true
                     continue
-                elseif one_length * 0.7 < pulse_count < one_length * 1.4
+                elseif one_length * 0.7 < pulse_count < one_length * 1.2
                     # This is a 1 bit
                     data |= 1 << second
                     second_done = true
@@ -161,7 +161,7 @@ function read_and_decode(port::String, rate::Signed, milliseconds::Real, time::R
                         # This is a 0 bit
                         second_done = true
                         continue
-                    elseif one_length * 0.7 < pulse_count < one_length * 1.4
+                    elseif one_length * 0.7 < pulse_count < one_length * 1.2
                         # This is a 1 bit
                         data |= 1 << second
                         second_done = true
