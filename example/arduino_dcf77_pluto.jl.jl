@@ -66,13 +66,13 @@ function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Real; 
                 second_done = false
                 second_start = idx
                 second += 1
-		Plots.vline!(p, [second_start]; linewidth=3, color=2)
-		Plots.annotate!(p, [second_start-2], [1000], [string(second)])
+                Plots.vline!(p, [second_start]; linewidth=3, color=2)
+                Plots.annotate!(p, [second_start-2], [1000], [string(second)])
             end
 
             if !second_done && idx > second_start + 1.5 * one_length
                 pulse_count = count(>(threshold), @view(signal[second_start:idx]))
-		# @show pulse_count, second_start
+                # @show pulse_count, second_start
                 if max(2, zero_length * 0.3) <= pulse_count < zero_length * 1.4
                     # This is a 0 bit
                     second_done = true
@@ -83,12 +83,12 @@ function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Real; 
                     second_done = true
                     continue
                 else
-		    # Only for debugging
-		    second_done = true
-		    @info "" second pulse_count
+                    # Only for debugging
+                    second_done = true
+                    @info "" second pulse_count
                     continue
 
-		    error("Something wrong at second $(second): this bit isn't 0 nor 1")
+                    error("Something wrong at second $(second): this bit isn't 0 nor 1")
                 end
             end
 
