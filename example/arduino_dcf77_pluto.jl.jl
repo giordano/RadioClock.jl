@@ -67,7 +67,7 @@ function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Real; 
                 second_start = idx
                 second += 1
                 Plots.vline!(p, [second_start]; linewidth=3, color=2)
-                Plots.annotate!(p, [second_start-2], [1000], [string(second)])
+                Plots.annotate!(p, [second_start-2], [maximum(signal)], [string(second)])
             end
 
             if !second_done && idx > second_start + 1.5 * one_length
@@ -103,13 +103,6 @@ function read_and_decode(signal::AbstractVector{<:Integer}, milliseconds::Real; 
     Plots.plot!(p, signal; color=1)
     return p, DCF77Data(data)
 end
-
-# ╔═╡ fbc1ba16-a12c-4dd2-9ab4-f66ebec242e4
-let
-    range = 8172:19732
-    #PlutoPlotly.plot(rsignal[range])
-    Plots.plot((range .- first(range)) ./ 1, rsignal[range])
-end;
 
 # ╔═╡ 6772c48f-c131-4117-a8f7-ae45433d16ec
 p, data = read_and_decode(rsignal, 5.2);
@@ -1455,7 +1448,6 @@ version = "1.9.2+0"
 # ╠═df67f8e0-725f-4ad7-bd22-ab00a7ac50d9
 # ╠═d3748a79-bacc-4c0f-b0c2-54d601290f56
 # ╠═f96a9285-9dfd-4db1-8956-130c4ce5b521
-# ╟─fbc1ba16-a12c-4dd2-9ab4-f66ebec242e4
 # ╠═a1d0c162-bd3c-4003-9aee-601bdb510e11
 # ╠═6772c48f-c131-4117-a8f7-ae45433d16ec
 # ╠═6c42288b-a32a-4315-ac80-13e9d05e7979
