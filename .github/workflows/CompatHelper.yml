@@ -2,7 +2,7 @@ name: CompatHelper
 
 on:
   schedule:
-    - cron: 7 23 * * *
+    - cron: 7 21 * * 3
   workflow_dispatch:
 
 permissions:
@@ -23,6 +23,7 @@ jobs:
           version: '1'
           arch: ${{ runner.arch }}
         if: steps.julia_in_path.outcome != 'success'
+      - uses: julia-actions/cache@v2
       - name: "Add the General registry via Git"
         run: |
           import Pkg
