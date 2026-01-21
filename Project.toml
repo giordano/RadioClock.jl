@@ -3,6 +3,9 @@ uuid = "494dee28-fb50-4d66-82c2-2f703a44d82e"
 version = "0.1.0"
 authors = ["Mosè Giordano <mose@gnu.org>"]
 
+[workspace]
+projects = ["docs", "test"]
+
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"

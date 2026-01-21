@@ -5,3 +5,12 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+  - package-ecosystem: "julia" # See documentation for possible values
+    # Location of Julia projects
+    directories:
+      - "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Ignore package itself
+      - dependency-name: "RadioClock"
