@@ -6,3 +6,6 @@ TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 
 [sources]
 RadioClock = {path = ".."}
+
+[compat]
+TimeZones = "1.22.2"
